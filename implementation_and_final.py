@@ -63,6 +63,8 @@ def reset(app):
     app.castedRays = 60
     if app.twoPlayer == True:
         app.castedRays = 35
+    if app.twoPlayer == False and app.build == True:
+        app.castedRays = 35
     app.stepAngle = app.fov / app.castedRays
     app.maxDepth = int(app.mapSize * app.tileSize) 
     app.scale = (app.screenHeight) / app.castedRays
@@ -95,6 +97,10 @@ def reset(app):
             app.exitRow.append(app.exit[i][0])
             app.exitCol.append(app.exit[i][1])
         # print(app.exitRow, app.exitCol)
+        for i in range (len(app.map)):
+            if (0, i) not in app.exit:
+                print('hi')
+                app.map[0][i] = 1
     if app.userInput == "":
         app.cellWidth = (0.5 * app.screenWidth) / app.mapSize
         app.cellHeight = (0.5 * app.screenHeight) / app.mapSize
@@ -374,9 +380,9 @@ def redrawAll(app):
         widths = [-400, -250, -100, 50, 200, 350]
         for i in range(3):
             for j in range(6):
-                drawRect((app.screenWidth / 2) + widths[j], (app.screenHeight / 2) - (175 - 150*i), 75, 75, fill=None, border='red')
-        drawRect((app.screenWidth / 2) - 100, (app.screenHeight / 2) + 275, 75, 75, fill=None, border='red')
-        drawRect((app.screenWidth / 2) + 50, (app.screenHeight / 2) + 275, 75, 75, fill=None, border='red')
+                drawRect((app.screenWidth / 2) + widths[j], (app.screenHeight / 2) - (175 - 150*i), 75, 75, fill='white', border='red')
+        drawRect((app.screenWidth / 2) - 100, (app.screenHeight / 2) + 275, 75, 75, fill='white', border='red')
+        drawRect((app.screenWidth / 2) + 50, (app.screenHeight / 2) + 275, 75, 75, fill='white', border='red')
         level = 1
         for i in range(3):
             for j in range(6):
@@ -387,9 +393,9 @@ def redrawAll(app):
     
     if app.build == True and app.win == False and app.playerAlive == True:
         drawImage(app.mazeurl, app.screenWidth / 2, app.screenHeight / 2, align = 'center', width = app.screenWidth, height = app.screenHeight)
-        drawLabel('What Size Map Do You Want?', app.screenWidth / 2, app.screenHeight / 2 - 350, size=50)
-        drawLabel('Max Map Size is 50, minimum map size is 6. Press enter when done.', app.screenWidth / 2, app.screenHeight / 2 - 250, size=25)
-        drawLabel(app.userInput, app.screenWidth / 2, app.screenHeight / 2 - 200, size=25)
+        drawLabel('What Size Map Do You Want?', app.screenWidth / 2, app.screenHeight / 2 - 350, size=50, fill = 'white')
+        drawLabel('Max Map Size is 50, minimum map size is 6. Press enter when done.', app.screenWidth / 2, app.screenHeight / 2 - 250, size=25, fill = 'white')
+        drawLabel(app.userInput, app.screenWidth / 2, app.screenHeight / 2 - 200, size=25, fill = 'white')
         if app.buildDone == True:
             drawRect(app.screenWidth / 2 - 200, app.screenHeight / 2 - 175, 400, 400)
             drawRect(app.screenWidth / 2 - 425, app.screenHeight / 2 + 275, 100, 100, fill = 'white', border = 'red')
@@ -478,9 +484,9 @@ def redrawAll(app):
     if app.home == True:
         drawImage(app.sharpurl, app.screenWidth / 2, app.screenHeight / 2, align = 'center', width = app.screenWidth, height = app.screenHeight)
         drawLabel('Monster Escape Maze', (app.screenWidth / 2), (app.screenHeight / 2) - 250, size=64)
-        drawRect((app.screenWidth / 2) - 150, (app.screenHeight / 2) - 150, 300, 100, fill=None, border='red')
-        drawRect((app.screenWidth / 2) - 150, (app.screenHeight / 2), 300, 100, fill=None, border='red')
-        drawRect((app.screenWidth / 2) - 150, (app.screenHeight / 2) + 150, 300, 100, fill=None, border='red')
+        drawRect((app.screenWidth / 2) - 150, (app.screenHeight / 2) - 150, 300, 100, fill='white', border='red')
+        drawRect((app.screenWidth / 2) - 150, (app.screenHeight / 2), 300, 100, fill='white', border='red')
+        drawRect((app.screenWidth / 2) - 150, (app.screenHeight / 2) + 150, 300, 100, fill='white', border='red')
         drawLabel('One Player Mode', (app.screenWidth / 2), (app.screenHeight / 2) - 100)
         drawLabel('Two Player Mode', (app.screenWidth / 2), (app.screenHeight / 2) + 50)
         drawLabel('Build Your Own Maze', (app.screenWidth / 2), (app.screenHeight / 2) + 200)
@@ -493,9 +499,9 @@ def redrawAll(app):
         widths = [-400, -250, -100, 50, 200, 350]
         for i in range(3):
             for j in range(6):
-                drawRect((app.screenWidth / 2) + widths[j], (app.screenHeight / 2) - (175 - 150*i), 75, 75, fill=None, border='red')
-        drawRect((app.screenWidth / 2) - 100, (app.screenHeight / 2) + 275, 75, 75, fill=None, border='red')
-        drawRect((app.screenWidth / 2) + 50, (app.screenHeight / 2) + 275, 75, 75, fill=None, border='red')
+                drawRect((app.screenWidth / 2) + widths[j], (app.screenHeight / 2) - (175 - 150*i), 75, 75, fill='white', border='red')
+        drawRect((app.screenWidth / 2) - 100, (app.screenHeight / 2) + 275, 75, 75, fill='white', border='red')
+        drawRect((app.screenWidth / 2) + 50, (app.screenHeight / 2) + 275, 75, 75, fill='white', border='red')
         level = 1
         for i in range(3):
             for j in range(6):
@@ -608,6 +614,61 @@ def redrawAll(app):
                             color = 'red'
                         if row % 2 == 0:
                             color = 'orange'
+                        if app.build == False and row == 0 and (col == app.exitCol - 1 or col == app.exitCol + 1):
+                            rand1 = random.randint(0, 255)
+                            rand2 = random.randint(0, 255)
+                            rand3 = random.randint(0, 255)
+                            color = rgb(rand1, rand2, rand3)
+                        if app.build == False and row == -1:
+                            rand1 = random.randint(0, 255)
+                            rand2 = random.randint(0, 255)
+                            rand3 = random.randint(0, 255)
+                            color = rgb(rand1, rand2, rand3)
+                        if app.build == True:
+                            for i in range(len(app.exit)):
+                                if row == app.exit[i][0] == 0 and (col == app.exit[i][1] - 1 or col == app.exit[i][1] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                            if row == -1:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                            for i in range(len(app.exit)):
+                                if row == app.exit[i][0] == app.mapSize - 1 and (col == app.exit[i][1] -1 or col == app.exit[i][1] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                            if row == app.mapSize:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                            for i in range(len(app.exit)):
+                                if col == app.exit[i][1] == 0 and (row == app.exit[i][0] - 1 or row == app.exit[i][0] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                            if col == -1:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                            for i in range(len(app.exit)):
+                                if col == app.exit[i][1] == app.mapSize - 1 and (row == app.exit[i][0] - 1 or row == app.exit[i][0] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                            if col == app.mapSize:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
 
                         #draw 3D projection (rectangle by rectangle)
                         drawRect((ray * app.scale), (app.screenWidth / 4 ) - wallHeight / 2, app.scale, wallHeight, fill=color)
@@ -813,23 +874,15 @@ def redrawAll(app):
                 # #calculate map square index
                 # square = row * app.mapSize + col
 
-                if app.map[row][col] == 1:
-                    # drawRect(col * app.tileSize, row * app.tileSize, app.tileSize - 2, app.tileSize - 2, fill="green")
-                    
-                    # draw casted ray
-                    # drawLine(app.playerx, app.playery, targetx, targety, fill="green")
-
+                if (app.map[row][col] == 1):
                     #calculate wall height
                     wallHeight = (21000 / (depth + 0.0001))
-
                     if row % 2 == 1:
                         color = 'red'
                     if row % 2 == 0:
                         color = 'orange'
-
                     #draw 3D projection (rectangle by rectangle)
                     drawRect((ray * app.scale), (app.screenWidth / 4 ) - wallHeight / 2, app.scale, wallHeight, fill=color)
-                    
                     break
 
                 if app.monsterMap[monsterRow][monsterCol] == 1:
@@ -983,6 +1036,16 @@ def redrawAll(app):
                         color = 'red'
                     if row % 2 == 0:
                         color = 'orange'
+                    # if app.build == False and row == 0 and (col == app.exitCol - 1 or col == app.exitCol + 1):
+                    #     rand1 = random.randint(0, 255)
+                    #     rand2 = random.randint(0, 255)
+                    #     rand3 = random.randint(0, 255)
+                    #     color = rgb(rand1, rand2, rand3)
+                    # if app.build == False and row == -1:
+                    #     rand1 = random.randint(0, 255)
+                    #     rand2 = random.randint(0, 255)
+                    #     rand3 = random.randint(0, 255)
+                    #     color = rgb(rand1, rand2, rand3)
 
                     #draw 3D projection (rectangle by rectangle)
                     drawRect(app.screenWidth / 2 + (ray * app.scale), (app.screenWidth / 4 ) - wallHeight / 2, app.scale, wallHeight, fill=color)
@@ -1193,9 +1256,6 @@ def redrawAll(app):
         drawLabel('Play Again', (app.screenWidth / 2), (app.screenHeight / 2) - 100)
         drawLabel('Return Home', (app.screenWidth / 2), (app.screenHeight / 2) + 50)
         drawLabel('Build a Different Map', (app.screenWidth / 2), (app.screenHeight / 2) + 200)
-
-
-    
 
     
 
@@ -1771,6 +1831,18 @@ def onMousePress(app, mouseX, mouseY):
         col = math.floor((app.placeExit[1] - leftDistance) / cellDisplaySize)
         if app.buildMap != [] and 0 <= row <= int(app.userInput) and 0 <= col <= int(app.userInput):
             app.buildMap[row][col] = 0
+            count = 0
+            for row in range(int(app.userInput)):
+                if app.buildMap[row][0] == 0:
+                    count += 1
+                if app.buildMap[row][-1] == 0:
+                    count += 1
+            for col in range(int(app.userInput)):
+                if app.buildMap[0][col] == 0:
+                    count += 1
+                if app.buildMap[-1][col] == 0:
+                    count += 1
+            print(count)
         if app.placeExit[0] == True and app.placeExit[1] >= (app.screenWidth / 2 - 200) and app.placeExit[1] <= (app.screenWidth / 2 - 200 + 400) and app.placeExit[2] >= (app.screenHeight / 2 - 175) and app.placeExit[2] <= (app.screenHeight / 2 - 175 + 400):
                 row = math.floor((app.placeExit[2] - topDistance) / cellDisplaySize)
                 col = math.floor((app.placeExit[1] - leftDistance) / cellDisplaySize)
