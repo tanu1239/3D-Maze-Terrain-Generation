@@ -51,6 +51,10 @@ def onAppStart(app):
     app.player2MapCellWidth = 1
     app.player2MapCellHeight = 1
     app.backgroundurl = 'lowest resolution.mp3'
+    app.playerHealthBoost = [False, 0]
+    app.twoPlayerHealthBoost = [False, 0]
+    app.playerShield = [False, 0]
+    app.twoPlayerShield = [False, 0]
     reset(app)
 
 def reset(app):
@@ -184,7 +188,12 @@ def reset(app):
     app.chests = []
     if app.buildChests == []:
         while len(app.chests) < app.chestCount:
-            randRow = random.randint(1, app.mapSize - 2)
+            if app.mapSize <= 11:
+                randRow = random.randint(1, app.mapSize - 3)
+            if app.mapSize > 11 and app.mapSize < 20:
+                randRow = random.randint(1, app.mapSize - 4)
+            if app.mapSize > 20:
+                randRow = random.randint(1, app.mapSize - 6)
             randCol = random.randint(1, app.mapSize - 1)
             randNoise = random.randint(1, 20)
             if app.map[randRow][randCol] == 0:
@@ -740,13 +749,15 @@ def redrawAll(app):
             drawCircle(int(app.playerx) / 2, int(app.playery) / 2, 8, fill="green")
             for monster in app.monsters:
                 drawCircle(int(monster[0]) / 2, int(monster[1]) / 2, 8, fill='red')
+                # imageWidth, imageHeight = getImageSize(app.zombieurl)
+                # drawImage(app.zombieurl, int(monster[0]) / 2, int(monster[1]) / 2, width = imageWidth // 2, height = imageHeight // 2, align='left-top')
             for chest in app.chests:
                 drawCircle(int(chest[0]) / 2, int(chest[1]) / 2, 8, fill='brown')
-                drawLabel('Weapons here', int(chest[0]) / 2, int(chest[1]) / 2)
+                drawLabel('Chest', int(chest[0]) / 2, int(chest[1]) / 2)
 
 
             # draw player direction
-            drawLine(app.playerx / 2, app.playery / 2, (app.playerx / 2) - math.sin(app.playerAngle) * 50, (app.playery / 2) + math.cos(app.playerAngle) * 50, lineWidth = 3)
+            drawLine(app.playerx / 2, app.playery / 2, (app.playerx / 2) - math.sin(app.playerAngle) * 25, (app.playery / 2) + math.cos(app.playerAngle) * 25, lineWidth = 3)
 
 
             if app.sword == True:
@@ -787,6 +798,10 @@ def redrawAll(app):
             if healthPercentage > 0:
                 drawLabel('Health', (7*app.screenWidth / 8) + app.screenWidth / 32, 15, size = 15)
                 drawRect(7*app.screenWidth / 8, 30, int((app.screenWidth / 16) * healthPercentage), 30, fill = color)
+            if app.playerHealthBoost[0] == True:
+                drawLabel('Received Boost!', (7*app.screenWidth / 8) - 50, 45, fill = 'green')
+            if app.playerShield[0] == True:
+                drawLabel('Shielded from Damage!', (7*app.screenWidth / 8) - 80, 45, fill = 'black')
 
 
     if app.twoPlayer == True and app.twoInitializer == False and app.home != True:
@@ -881,6 +896,61 @@ def redrawAll(app):
                         color = 'red'
                     if row % 2 == 0:
                         color = 'orange'
+                    if app.build == False and row == 0 and (col == app.exitCol - 1 or col == app.exitCol + 1):
+                            rand1 = random.randint(0, 255)
+                            rand2 = random.randint(0, 255)
+                            rand3 = random.randint(0, 255)
+                            color = rgb(rand1, rand2, rand3)
+                    if app.build == False and row == -1:
+                            rand1 = random.randint(0, 255)
+                            rand2 = random.randint(0, 255)
+                            rand3 = random.randint(0, 255)
+                            color = rgb(rand1, rand2, rand3)
+                    if app.build == True:
+                        for i in range(len(app.exit)):
+                            if row == app.exit[i][0] == 0 and (col == app.exit[i][1] - 1 or col == app.exit[i][1] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if row == -1:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                        for i in range(len(app.exit)):
+                                if row == app.exit[i][0] == app.mapSize - 1 and (col == app.exit[i][1] -1 or col == app.exit[i][1] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if row == app.mapSize:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                        for i in range(len(app.exit)):
+                                if col == app.exit[i][1] == 0 and (row == app.exit[i][0] - 1 or row == app.exit[i][0] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if col == -1:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                        for i in range(len(app.exit)):
+                                if col == app.exit[i][1] == app.mapSize - 1 and (row == app.exit[i][0] - 1 or row == app.exit[i][0] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if col == app.mapSize:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
                     #draw 3D projection (rectangle by rectangle)
                     drawRect((ray * app.scale), (app.screenWidth / 4 ) - wallHeight / 2, app.scale, wallHeight, fill=color)
                     break
@@ -911,11 +981,16 @@ def redrawAll(app):
                     drawCircle(cx, cy, 8, fill='red')
                     break
 
-                if app.player1Map[player1Row][player1Col] == 1:
+                if app.player1Map[player1Row][player1Col] == 1 and app.playerHealth > 0:
                     player1Height = (21000 / (depth + 0.0001))
                     color = gradient('white', 'black', start='bottom')
-                    drawRect((ray * app.scale), ((app.screenWidth / 4) - player1Height / 2), app.scale, player1Height / 2, fill='black')
-                    drawRect((ray * app.scale), ((app.screenWidth / 4) - player1Height / 4), app.scale, player1Height, fill=color)
+                    if app.playerShield[0] == False:
+                        drawRect((ray * app.scale), ((app.screenWidth / 4) - player1Height / 2), app.scale, player1Height / 2, fill='black')
+                        drawRect((ray * app.scale), ((app.screenWidth / 4) - player1Height / 4), app.scale, player1Height, fill=color)
+                    if app.playerShield[0] == True:
+                        silver = rgb(192, 192, 192)
+                        drawRect((ray * app.scale), ((app.screenWidth / 4) - player1Height / 2), app.scale, player1Height / 2, fill=silver)
+                        drawRect((ray * app.scale), ((app.screenWidth / 4) - player1Height / 4), app.scale, player1Height, fill=silver)
                     break
 
 
@@ -957,10 +1032,12 @@ def redrawAll(app):
             drawCircle(int(monster[0]) / 2, int(monster[1]) / 2, 8, fill='red')
         for chest in app.chests:
             drawCircle(int(chest[0]) / 2, int(chest[1]) / 2, 8, fill='brown')
-            drawLabel('Weapons here', int(chest[0]) / 2, int(chest[1]) / 2)
+            drawLabel('Chest', int(chest[0]) / 2, int(chest[1]) / 2)
 
         #draw other player
-        drawCircle(int(app.playerx) / 2, int(app.playery) / 2, 8, fill='white')
+        if app.playerHealth > 0:
+            drawCircle(int(app.playerx) / 2, int(app.playery) / 2, 8, fill='white')
+            drawLabel('Opp', int(app.playerx) / 2, int(app.playery) / 2)
 
         # draw player direction
         drawLine(app.twoPlayerx / 2, app.twoPlayery / 2, (app.twoPlayerx / 2) - math.sin(app.twoPlayerAngle) * 25, (app.twoPlayery / 2) + math.cos(app.twoPlayerAngle) * 25, lineWidth = 3)
@@ -1036,16 +1113,61 @@ def redrawAll(app):
                         color = 'red'
                     if row % 2 == 0:
                         color = 'orange'
-                    # if app.build == False and row == 0 and (col == app.exitCol - 1 or col == app.exitCol + 1):
-                    #     rand1 = random.randint(0, 255)
-                    #     rand2 = random.randint(0, 255)
-                    #     rand3 = random.randint(0, 255)
-                    #     color = rgb(rand1, rand2, rand3)
-                    # if app.build == False and row == -1:
-                    #     rand1 = random.randint(0, 255)
-                    #     rand2 = random.randint(0, 255)
-                    #     rand3 = random.randint(0, 255)
-                    #     color = rgb(rand1, rand2, rand3)
+                    if app.build == False and row == 0 and (col == app.exitCol - 1 or col == app.exitCol + 1):
+                            rand1 = random.randint(0, 255)
+                            rand2 = random.randint(0, 255)
+                            rand3 = random.randint(0, 255)
+                            color = rgb(rand1, rand2, rand3)
+                    if app.build == False and row == -1:
+                            rand1 = random.randint(0, 255)
+                            rand2 = random.randint(0, 255)
+                            rand3 = random.randint(0, 255)
+                            color = rgb(rand1, rand2, rand3)
+                    if app.build == True:
+                        for i in range(len(app.exit)):
+                                if row == app.exit[i][0] == 0 and (col == app.exit[i][1] - 1 or col == app.exit[i][1] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if row == -1:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                        for i in range(len(app.exit)):
+                                if row == app.exit[i][0] == app.mapSize - 1 and (col == app.exit[i][1] -1 or col == app.exit[i][1] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if row == app.mapSize:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                        for i in range(len(app.exit)):
+                                if col == app.exit[i][1] == 0 and (row == app.exit[i][0] - 1 or row == app.exit[i][0] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if col == -1:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
+                        for i in range(len(app.exit)):
+                                if col == app.exit[i][1] == app.mapSize - 1 and (row == app.exit[i][0] - 1 or row == app.exit[i][0] + 1):
+                                    rand1 = random.randint(0, 255)
+                                    rand2 = random.randint(0, 255)
+                                    rand3 = random.randint(0, 255)
+                                    color = rgb(rand1, rand2, rand3)
+                        if col == app.mapSize:
+                                rand1 = random.randint(0, 255)
+                                rand2 = random.randint(0, 255)
+                                rand3 = random.randint(0, 255)
+                                color = rgb(rand1, rand2, rand3)
 
                     #draw 3D projection (rectangle by rectangle)
                     drawRect(app.screenWidth / 2 + (ray * app.scale), (app.screenWidth / 4 ) - wallHeight / 2, app.scale, wallHeight, fill=color)
@@ -1078,11 +1200,16 @@ def redrawAll(app):
                     drawCircle(cx, cy, 8, fill='red')
                     break
 
-                if app.player2Map[player2Row][player2Col] == 1:
+                if app.player2Map[player2Row][player2Col] == 1 and app.twoPlayerHealth > 0:
                     player2Height = (21000 / (depth + 0.0001))
                     color = gradient('white', 'black', start='bottom')
-                    drawRect(app.screenWidth / 2 + (ray * app.scale), ((app.screenWidth / 4) - player2Height / 2), app.scale, player2Height / 2, fill='black')
-                    drawRect(app.screenWidth / 2 + (ray * app.scale), ((app.screenWidth / 4) - player2Height / 4), app.scale, player2Height, fill=color)
+                    if app.twoPlayerShield[0] == False:
+                        drawRect(app.screenWidth / 2 + (ray * app.scale), ((app.screenWidth / 4) - player2Height / 2), app.scale, player2Height / 2, fill='black')
+                        drawRect(app.screenWidth / 2 + (ray * app.scale), ((app.screenWidth / 4) - player2Height / 4), app.scale, player2Height, fill=color)
+                    if app.twoPlayerShield[0] == True:
+                        silver = rgb(192, 192, 192)
+                        drawRect(app.screenWidth / 2 + (ray * app.scale), ((app.screenWidth / 4) - player2Height / 2), app.scale, player2Height / 2, fill=silver)
+                        drawRect(app.screenWidth / 2 + (ray * app.scale), ((app.screenWidth / 4) - player2Height / 4), app.scale, player2Height, fill=silver)
                     break
 
             # increment angle by a single step
@@ -1119,10 +1246,12 @@ def redrawAll(app):
             drawCircle((app.screenWidth / 2) + (int(monster[0]) / 2), int(monster[1]) / 2, 8, fill='red')
         for chest in app.chests:
             drawCircle((app.screenWidth / 2) + (int(chest[0]) / 2), int(chest[1]) / 2, 8, fill='brown')
-            drawLabel('Weapons here', (app.screenWidth / 2) + (int(chest[0]) / 2), int(chest[1]) / 2)
+            drawLabel('Chest', (app.screenWidth / 2) + (int(chest[0]) / 2), int(chest[1]) / 2)
 
         #draw other player
-        drawCircle((app.screenWidth / 2 ) + int(app.twoPlayerx) / 2, int(app.twoPlayery) / 2, 8, fill='white')
+        if app.twoPlayerHealth > 0:
+            drawCircle((app.screenWidth / 2 ) + int(app.twoPlayerx) / 2, int(app.twoPlayery) / 2, 8, fill='white')
+            drawLabel('Opp', (app.screenWidth / 2 ) + int(app.twoPlayerx) / 2, int(app.twoPlayery) / 2)
 
         # draw player direction
         drawLine((app.screenWidth / 2) + (app.playerx / 2), app.playery / 2, ((app.screenWidth / 2) + (app.playerx / 2)) - math.sin(app.playerAngle) * 25, (app.playery / 2) + math.cos(app.playerAngle) * 25, lineWidth = 3)
@@ -1168,6 +1297,10 @@ def redrawAll(app):
         if healthPercentage > 0:
             drawLabel('Health', (7*app.screenWidth / 8) + app.screenWidth / 32, 15, size = 15)
             drawRect(7*app.screenWidth / 8, 30, (app.screenWidth / 16) * healthPercentage, 30, fill = color)
+        if app.playerHealthBoost[0] == True:
+            drawLabel('Received Boost!', (7*app.screenWidth / 8) - 50, 45, fill = 'green')
+        if app.playerShield[0] == True:
+            drawLabel('Shielded from Damage!', (7*app.screenWidth / 8) - 80, 45, fill = 'black')
 
         drawRect((3*app.screenWidth / 8) - 2, 28, (app.screenWidth / 16) + 4, 34, fill = None, border = 'black', borderWidth = 5)
         healthPercentage = app.twoPlayerHealth / 500
@@ -1181,6 +1314,10 @@ def redrawAll(app):
         if healthPercentage > 0:
             drawLabel('Health', (3*app.screenWidth / 8) + app.screenWidth / 32, 15, size = 15)
             drawRect(3*app.screenWidth / 8, 30, (app.screenWidth / 16) * healthPercentage, 30, fill = color)
+        if app.twoPlayerHealthBoost[0] == True:
+            drawLabel('Received Boost!', (3*app.screenWidth / 8) - 50, 45, fill = 'green')
+        if app.twoPlayerShield[0] == True:
+            drawLabel('Shielded from Damage!', (3*app.screenWidth / 8) - 80, 45, fill = 'black')
     
     if (app.playerAlive == False or app.onePlayerEnd == True or app.playerHealth <= 0) and app.win == False and app.twoWin == False and app.twoPlayerHealth >= 0 and app.onePlayer == False:
         drawRect(app.screenWidth / 2, 0, app.screenWidth / 2, app.screenHeight, fill='white')
@@ -1444,23 +1581,25 @@ def onKeyHold(app, keys):
             i = 0
             while i != len(app.monsters):
                 if distance(app.monsters[i][0], app.monsters[i][1], app.twoPlayerx, app.twoPlayery) < 45:
-                    if app.woodenSword == True:
+                    if app.twoWoodenSword == True:
                         app.monsters[i][3] -= 1
-                    if app.stoneSword == True:
+                    if app.twoStoneSword == True:
                         app.monsters[i][3] -= 2
-                    if app.ironSword == True:
+                    if app.twoIronSword == True:
                         app.monsters[i][3] -= 3
-                    if app.goldenSword == True:
+                    if app.twoGoldenSword == True:
                         app.monsters[i][3] -= 5
-                    if app.diamondSword == True:
+                    if app.twoDiamondSword == True:
                         app.monsters[i][3] -= 10
                     if app.monsters[i][3] <= 0:
                         app.monsters.pop(i)
                         continue
+                    print(app.monsters[i][3])
                 i += 1
             if app.twoPlayer == True:
                 if distance(app.playerx, app.playery, app.twoPlayerx, app.twoPlayery) < 45:
-                    app.playerHealth -= 50
+                    if app.playerShield[0] == False:
+                        app.playerHealth -= 50
                 if app.playerHealth <= 0:
                     app.playerAlive = False
                     app.onePlayerEnd = True
@@ -1506,10 +1645,12 @@ def onKeyHold(app, keys):
 def checkIfNearbyMonsters(app):
     for monster in app.monsters:
         if distance(monster[0], monster[1], app.playerx, app.playery) < 20:
-            app.playerHealth -= 10
+            if app.playerShield[0] == False:
+                app.playerHealth -= 10
         if app.twoPlayerx != None and app.twoPlayery != None:
             if distance(monster[0], monster[1], app.twoPlayerx, app.twoPlayery) < 20:
-                app.twoPlayerHealth -= 10
+                if app.twoPlayerShield[0] == False:
+                    app.twoPlayerHealth -= 10
     return True
 
 def onStep(app):
@@ -1586,42 +1727,49 @@ def onStep(app):
     i = 0
     while i < len(app.chests):
         if distance(app.chests[i][0], app.chests[i][1], app.playerx, app.playery) < 25:
-            app.sword = True
-            app.sword = True
-            app.woodenSword = False
-            app.stoneSword = False
-            app.ironSword = False
-            app.goldenSword = False
-            app.diamondSword = False
-            app.currSword = None
+            swordSelector = random.randint(1, 100)
+            print(swordSelector)
+            if swordSelector < 86:
+                app.sword = True
+                app.sword = True
+                app.woodenSword = False
+                app.stoneSword = False
+                app.ironSword = False
+                app.goldenSword = False
+                app.diamondSword = False
+                app.currSword = None
             chestCol = math.floor(app.chests[i][0] / app.chestMapCellWidth)
             chestRow = math.floor(app.chests[i][1] / app.chestMapCellHeight)
-            swordSelector = random.randint(1, 100)
-            if swordSelector <= 40:
+            if swordSelector <= 25:
                 app.woodenSword = True
                 if 'wood' not in app.collectedSwords:
                     app.collectedSwords.append('wood')
                 app.currSword = 'wood'
-            if swordSelector >= 41 and swordSelector <= 70:
+            if swordSelector >= 26 and swordSelector <= 55:
                 app.stoneSword = True
                 if 'stone' not in app.collectedSwords:
                     app.collectedSwords.append('stone')
                 app.currSword = 'stone'
-            if swordSelector >= 71 and swordSelector <= 85:
+            if swordSelector >= 56 and swordSelector <= 70:
                 app.ironSword = True
                 if 'iron' not in app.collectedSwords:
                     app.collectedSwords.append('iron')
                 app.currSword = 'iron'
-            if swordSelector >= 86 and swordSelector <= 95:
+            if swordSelector >= 71 and swordSelector <= 80:
                 app.goldenSword = True
                 if 'gold' not in app.collectedSwords:
                     app.collectedSwords.append('gold')
                 app.currSword = 'gold'
-            if swordSelector >= 96:
+            if swordSelector >= 81 and swordSelector <= 85:
                 app.diamondSword = True
                 if 'diamond' not in app.collectedSwords:
                     app.collectedSwords.append('diamond')
                 app.currSword = 'diamond'
+            if swordSelector >= 86 and swordSelector <= 95:
+                app.playerHealth = 500
+                app.playerHealthBoost = [True, 0]
+            if swordSelector >= 96:
+                app.playerShield = [True, 0]
             print(app.collectedSwords)
             app.chestMap[chestRow][chestCol] = 0
             if app.build == True:
@@ -1644,41 +1792,48 @@ def onStep(app):
         i = 0
         while i < len(app.chests):
             if distance(app.chests[i][0], app.chests[i][1], app.twoPlayerx, app.twoPlayery) < 25:
-                app.twoSword = True
-                app.twoWoodenSword = False
-                app.twoStoneSword = False
-                app.twoIronSword = False
-                app.twoGoldenSword = False
-                app.twoDiamondSword = False
-                app.twoCurrSword = None
+                swordSelector = random.randint(1, 100)
+                print(swordSelector)
+                if swordSelector < 86:
+                    app.twoSword = True
+                    app.twoWoodenSword = False
+                    app.twoStoneSword = False
+                    app.twoIronSword = False
+                    app.twoGoldenSword = False
+                    app.twoDiamondSword = False
+                    app.twoCurrSword = None
                 chestCol = math.floor(app.chests[i][0] / app.chestMapCellWidth)
                 chestRow = math.floor(app.chests[i][1] / app.chestMapCellHeight)
-                swordSelector = random.randint(1, 100)
-                if swordSelector <= 40:
+                if swordSelector <= 25:
                     app.twoWoodenSword = True
                     if 'wood' not in app.twoCollectedSwords:
                         app.twoCollectedSwords.append('wood')
                     app.twoCurrSword = 'wood'
-                if swordSelector >= 41 and swordSelector <= 70:
+                if swordSelector >= 26 and swordSelector <= 55:
                     app.twoStoneSword = True
                     if 'stone' not in app.twoCollectedSwords:
                         app.twoCollectedSwords.append('stone')
                     app.twoCurrSword = 'stone'
-                if swordSelector >= 71 and swordSelector <= 85:
+                if swordSelector >= 56 and swordSelector <= 70:
                     app.twoIronSword = True
                     if 'iron' not in app.twoCollectedSwords:
                         app.twoCollectedSwords.append('iron')
                     app.twoCurrSword = 'iron'
-                if swordSelector >= 86 and swordSelector <= 95:
+                if swordSelector >= 71 and swordSelector <= 80:
                     app.twoGoldenSword = True
                     if 'gold' not in app.twoCollectedSwords:
                         app.twoCollectedSwords.append('gold')
                     app.twoCurrSword = 'gold'
-                if swordSelector >= 96:
+                if swordSelector >= 81 and swordSelector <= 85:
                     app.twoDiamondSword = True
                     if 'diamond' not in app.twoCollectedSwords:
                         app.twoCollectedSwords.append('diamond')
                     app.twoCurrSword = 'diamond'
+                if swordSelector >= 86 and swordSelector <= 95:
+                    app.twoPlayerHealth = 500
+                    app.twoPlayerHealthBoost = [True, 0]
+                if swordSelector >= 96:
+                    app.twoPlayerShield = [True, 0]
                 print(app.twoCollectedSwords)
                 app.chestMap[chestRow][chestCol] = 0
                 if app.build == True:
@@ -1738,6 +1893,26 @@ def onStep(app):
         player2Col = int(app.twoPlayerx / app.player2MapCellWidth)
         if app.player2Map != [] and 0 <= player2Row <= len(app.player2Map) and 0 <= player2Col <= len(app.player2Map[0]):
             app.player2Map[player2Row][player2Col] = 1
+    
+    if app.playerHealthBoost[0] == True:
+        app.playerHealthBoost[1] += 1
+        if app.playerHealthBoost[1] >= 10:
+            app.playerHealthBoost = [False, 0]
+
+    if app.twoPlayerHealthBoost[0] == True:
+        app.twoPlayerHealthBoost[1] += 1
+        if app.twoPlayerHealthBoost[1] >= 10:
+            app.twoPlayerHealthBoost = [False, 0]
+    
+    if app.playerShield[0] == True:
+        app.playerShield[1] += 1
+        if app.playerShield[1] >= 100:
+            app.playerShield = [False, 0]
+
+    if app.twoPlayerShield[0] == True:
+        app.twoPlayerShield[1] += 1
+        if app.twoPlayerShield[1] >= 100:
+            app.twoPlayerShield = [False, 0]
 
         # countOne = 0
         # for row in range(app.mapSize):
@@ -2488,7 +2663,8 @@ def onMousePress(app, mouseX, mouseY):
 
             if app.twoPlayer == True:
                 if distance(app.playerx, app.playery, app.twoPlayerx, app.twoPlayery) < 45:
-                    app.twoPlayerHealth -= 50
+                    if app.twoPlayerShield[0] == False:
+                        app.twoPlayerHealth -= 50
                 if app.twoPlayerHealth <= 0:
                     app.twoPlayerAlive = False
                     app.twoPlayerEnd = True
